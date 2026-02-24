@@ -2,6 +2,7 @@
 from fastapi import FastAPI, status, HTTPException
 import asyncio
 from typing import Optional
+from pydantic import BaseModel, Field 
 
 #Instancia del servidor
 app = FastAPI(
@@ -28,6 +29,11 @@ usuarios = [
     {"id": 2, "nombre": "Aly", "edad": 21},
     {"id": 3, "nombre": "Dulce", "edad": 21}
 ]
+
+class crear_usuario(BaseModel):
+    id: int = Field(..., description="Identificador")
+    nombre: str = Field(..., min_length=3, max_length=50, example="Juanita")
+    edad: int = Field(..., ge=1, le=123, descriprion="Edad valida entre 1 y 123")
 
 #Endpoint con parametros obligatorios
 @app.get("/v1/parametroOb/{id}", tags=['Parametro Obligatorio'])
@@ -68,18 +74,18 @@ async def leer_usuarios():
         }
 
 #POST
-@app.post("/v1/usuarios", tags=['HTTP CRUD'])
-async def agregar_usuario(usuario: dict):
+@app.post("/v1/usuarios/", tags=['HTTP CRUD'], status_code=status.HTTP_201_CREATED)
+async def crear_usuario(usuario: crear_usuario):
     for usr in usuarios:
-        if usr["id"] == usuario.get("id"):
+        if usr["id"] == usuario.id:
             raise HTTPException(
                 status_code=400,
                 detail="El id ya existe"
             )
     usuarios.append(usuario)
     return {
-        "mensaje": "Usuario Creado",
-        "Datos nuevos": usuario
+        "mensaje": "Usuario Agregado",
+        "Usuario": usuario
     }
 
 #PUT
@@ -123,4 +129,5 @@ async def eliminar_usuario(id: int):
     raise HTTPException(
         status_code=404, 
         detail="usuario no encontrado")
+
 
