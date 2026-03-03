@@ -1,8 +1,10 @@
 #importaciones
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Depends # Importación de Depends para manejar dependencias en FastAPI
 import asyncio
 from typing import Optional
 from pydantic import BaseModel, Field 
+from fastapi.security import HTTPBasic, HTTPBasicCredentials # Importación de HTTPBasic y HTTPBasicCredentials para autenticación básica
+import secrets
 
 #Instancia del servidor
 app = FastAPI(
@@ -34,6 +36,22 @@ class crear_usuario(BaseModel):
     id: int = Field(..., description="Identificador")
     nombre: str = Field(..., min_length=3, max_length=50, example="Juanita")
     edad: int = Field(..., ge=1, le=123, descriprion="Edad valida entre 1 y 123")
+
+
+#Seguridad HTTP Basic --------------------------------------------------------------------------------------------------
+security = HTTPBasic()
+def verificar_peticion(credenciales:HTTPBasicCredentials=Depends(security)):
+    usuario_correcto = secrets.compare_digest(credenciales.username, "carmen")
+    contrasena_correcta = secrets.compare_digest(credenciales.password, "123456")
+
+    if not (usuario_correcto and contrasena_correcta):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales no validas"
+        )
+    return credenciales.username
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 #Endpoint con parametros obligatorios
 @app.get("/v1/parametroOb/{id}", tags=['Parametro Obligatorio'])
@@ -117,13 +135,13 @@ async def modificar_usuario(id: int, cambios: dict):
         detail="usuario no encontrado")
 
 #DELETE
-@app.delete("/v1/usuarios/{id}", tags=['HTTP CRUD'])
-async def eliminar_usuario(id: int):
+@app.delete("/v1/usuarios/{id}", tags=['HTTP CRUD'], status_code=status.HTTP_200_OK)
+async def eliminar_usuario(id: int, usuarioAuth:str = Depends(verificar_peticion)):
     for idx, usr in enumerate(usuarios):
         if usr["id"] == id:
             usuarios.pop(idx)
             return {
-                "mensaje": "usuario eliminado",
+                "mensaje": f"usuario eliminado por {usuarioAuth}",
                 "id eliminado": id
             }
     raise HTTPException(
