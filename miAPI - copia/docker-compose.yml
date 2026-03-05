@@ -1,0 +1,9 @@
+#lo que se requiere para uno o varios contenedores, se define la estructura de cada uno de ellos
+services:
+  api:
+    build: . 
+    container_name: Server_FastAPI
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./app:/app/app
