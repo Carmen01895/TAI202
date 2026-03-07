@@ -1,0 +1,6 @@
+#se define que dependencias se necesitan para trabajar FastAPI
+uvicorn[standard]
+fastapi
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
