@@ -1,8 +1,8 @@
-services:
-  api: 
-    build:
-    container_name: EXAMEN_2P
+services: 
+  api:
+    build: .
+    container_name: EXAMEN
     ports:
-      - "5000:5000"
-    volumes:
+      - "8000:8000"
+    volumes: 
       - ./app:/app/app
