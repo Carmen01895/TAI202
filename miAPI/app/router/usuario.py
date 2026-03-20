@@ -5,7 +5,7 @@ from app.security.auth import verificar_peticion
 
 router = APIRouter(
     prefix='/v1/usuarios',
-    tags='CRUD HTTP'
+    tags=['CRUD HTTP']
 )
 
 #GET

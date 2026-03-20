@@ -1,3 +1,5 @@
 #se define que dependencias se necesitan para trabajar FastAPI
 uvicorn[standard]
 fastapi
+sqlalchemy 
+psycopg2-binary
